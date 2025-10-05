@@ -6,7 +6,8 @@
   <title>Fractal Big O — Engineering Tool • Reproducible, Falsifiable, 10th‑Grade Ready</title>
   <style>
     :root{--bg:#0b1020;--panel:#121933;--ink:#e8ecff;--muted:#a6b0d6;--accent:#7cc4ff;--ok:#7dffb2;--warn:#ffd36e;--bad:#ff8a8a;--border:#1d2646;--card:linear-gradient(180deg,#111834,#0e1429)}
-    *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif}
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif}
     .container{max-width:1360px;margin:0 auto;padding:20px}
     .header{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.3)}
     .header h1{margin:0 0 8px;font-size:2.4rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--ok));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -50,6 +51,10 @@
     .muted{color:var(--muted)}
     .tip{background:rgba(124,196,255,.06);border:1px dashed var(--accent);border-radius:12px;padding:10px;color:#cfe1ff}
     .warn{background:rgba(255,211,110,.08);border:1px solid var(--warn);border-radius:12px;padding:10px}
+
+    /* Explainer styling */
+    .expl{background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:12px;padding:12px;margin:10px 0}
+    .expl h3{margin:0 0 6px;color:var(--accent);font-size:1.1em}
   </style>
 </head>
 <body>
@@ -67,6 +72,7 @@
       <button class="tab" data-tab="temporal">⚡ Temporal</button>
       <button class="tab" data-tab="tests">✅ Tests</button>
       <button class="tab" data-tab="learn">🎓 Learn</button>
+      <button class="tab" data-tab="explainer">🧭 Explainer</button>
       <button class="tab" data-tab="eng">⚙️ Engineering</button>
     </div>
 
@@ -140,6 +146,50 @@
       <div class="card"><div class="card-header">⚡ Temporal Fractal</div><div class="card-content"><div class="tip"><strong>Position</strong> D<sub>k</sub> • <strong>Velocity</strong> D<sub>k,t</sub> • <strong>Acceleration</strong> a<sub>k</sub>. Peaks in a<sub>k</sub> warn of phase transitions.</div><div class="btns"><button class="primary" id="runTemp">Run Temporal Analysis</button><button class="test" id="cmpTemp">Compare Temporal Patterns</button></div><div class="chart" style="margin-top:10px"><canvas id="chartTemp"></canvas></div><div id="tempOut" class="tip" style="display:none;margin-top:10px"></div></div></div>
     </div>
 
+    <!-- EXPLAINER (Beginner) -->
+    <div class="tabpane" id="explainer" style="display:none">
+      <div class="card">
+        <div class="card-header">🧭 From Big‑O to Fractal‑O (Beginner Friendly)</div>
+        <div class="card-content">
+          <div class="expl"><h3>Big‑O in One Minute</h3>
+            <p class="muted">Big‑O tells how steps grow with input size: <strong>O(1)</strong>, <strong>O(n)</strong>, <strong>O(n²)</strong>, <strong>O(2ⁿ)</strong>. It’s a speed scale — but it ignores <em>how</em> the work is shaped.</p>
+          </div>
+          <div class="expl"><h3>What Fractal‑O Adds</h3>
+            <p class="muted">Algorithms build patterns (branches/layers). We measure how full those patterns get.</p>
+            <div class="formula">D<sub>k</sub> = lim<sub>i→∞</sub> F<sub>i</sub> / G<sub>i</sub></div>
+            <ul class="muted" style="line-height:1.6">
+              <li><strong>F<sub>i</sub></strong>: real work at depth <em>i</em></li>
+              <li><strong>G<sub>i</sub></strong>: possible work at depth <em>i</em> (model)</li>
+              <li><strong>D<sub>k</sub></strong>: fullness (density) of the structure</li>
+            </ul>
+          </div>
+          <div class="expl"><h3>Temporal Layer (Speed & Acceleration)</h3>
+            <div class="formula">D<sub>k,t</sub> = (F<sub>i</sub>/Δt<sub>i</sub>)/G<sub>i</sub>  |  a<sub>k</sub> = ΔD<sub>k,t</sub>/Δt</div>
+            <p class="muted">Now we can see how fast the structure fills and whether it’s stabilizing or spiking.</p>
+          </div>
+          <div class="expl"><h3>Side‑by‑Side (Analogy)</h3>
+            <table>
+              <thead><tr><th>Concept</th><th>Classical Big‑O</th><th>Fractal‑O</th></tr></thead>
+              <tbody>
+                <tr><td>Question</td><td>How many steps?</td><td>How full are the branches?</td></tr>
+                <tr><td>View</td><td>Stopwatch</td><td>Microscope</td></tr>
+                <tr><td>Output</td><td>One growth rate</td><td>Density profile + class (Triangle → Hexagon)</td></tr>
+                <tr><td>Temporal</td><td>—</td><td>Velocity (D<sub>k,t</sub>) & Acceleration (a<sub>k</sub>)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="expl"><h3>Quick Seeing‑is‑Believing</h3>
+            <ul class="muted" style="line-height:1.6">
+              <li><strong>Naïve vs Memoized Fibonacci</strong>: density drops when you add memoization.</li>
+              <li><strong>Bubble vs Merge Sort</strong>: same input, very different density signatures.</li>
+              <li><strong>Binary Search</strong>: very sparse (Triangle) — uses tiny fraction of the space.</li>
+            </ul>
+            <button class="primary" onclick="setTab('analyzer')">🎯 Try It in the Analyzer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- TESTS -->
     <div class="tabpane" id="tests" style="display:none">
       <div class="card"><div class="card-header">✅ Falsifiability Suite</div><div class="card-content"><div class="grid g2"><div class="card"><div class="card-header">🧪 Density Differentiation</div><div class="card-content"><p class="muted">Same O(·) can still differ in fractal density.</p><button class="test" id="tDensity">Run Test</button><div id="tOutDensity" class="tip" style="display:none;margin-top:10px"></div></div></div><div class="card"><div class="card-header">🧪 Optimization Impact</div><div class="card-content"><p class="muted">Memoization or structure change drops class.</p><button class="test" id="tOpt">Run Test</button><div id="tOutOpt" class="tip" style="display:none;margin-top:10px"></div></div></div><div class="card"><div class="card-header">🧪 Phase Transitions</div><div class="card-content"><p class="muted">Near D→1 expect cliffs.</p><button class="test" id="tPhase">Run Test</button><div id="tOutPhase" class="tip" style="display:none;margin-top:10px"></div></div></div><div class="card"><div class="card-header">🧪 Predictive Accuracy</div><div class="card-content"><p class="muted">Higher density ⇒ worse scaling (generally).</p><button class="test" id="tPred">Run Test</button><div id="tOutPred" class="tip" style="display:none;margin-top:10px"></div></div></div></div><div class="btns" style="margin-top:10px"><button class="primary" id="tAll">Run All</button><button class="secondary" id="tExport">Export Results</button></div></div></div>
@@ -171,7 +221,7 @@ function setParams(obj){const u=new URL(location.href);Object.entries(obj).forEa
 function getParams(){return Object.fromEntries(new URL(location.href).searchParams.entries())}
 
 // ---------- Algorithm Library (instrumented) ----------
-// Each returns {Fi[], times[]}; we interpret depth as recursion level / pass / frontier.
+// Each returns {Fi[], times[]} (T = times); depth is recursion level / pass / frontier.
 const ALG={
   // Search & Trees
   linear:{name:'Linear Search',cls:'O(n)',cat:'Search',impl:(n,I)=>{const Fi=[],T=[];for(let i=0;i<=I;i++){const t0=performance.now();Fi[i]=Math.min(n,(i+1));for(let k=0;k<Fi[i];k++){}T[i]=performance.now()-t0}return {Fi:Fi,T:T}}},
@@ -208,23 +258,47 @@ function classify(d){if(d<.3)return'Triangle';if(d<.5)return'Square';if(d<.7)ret
 function confidence(d,slope,trials,r2){let c=.3;if(trials>=3)c+=.2;if(r2>.8)c+=.3;else if(r2>.6)c+=.2;else if(r2>.4)c+=.1;if((d<.3&&slope<.5)||(d>.8&&slope>.8)||(d>=.3&&d<=.8&&slope>=.4&&slope<=.8))c+=.2;return Math.min(.99,c)}
 
 let state=null, testsLog={};
-function analyze(key){const n=parseInt($('n').value,10),I=parseInt($('depth').value,10),tr=Math.max(1,parseInt($('trials').value,10)),model=$('gmodel').value,b=parseFloat($('bval').value)||2; let FiA=new Array(I+1).fill(0), TA=new Array(I+1).fill(0); for(let t=0;t<tr;t++){const r=ALG[key].impl(n,I); for(let i=0;i<=I;i++){FiA[i]+=r.Fi[i]||0;TA[i]+=r.T[i]||0}} const Fi=FiA.map(x=>x/tr), T=TA.map(x=>x/tr); const Gi=buildGi(I,model,b,Fi); const Di=Fi.map((v,i)=>v/Math.max(1e-9,Gi[i])); const safeT=T.map(x=>Math.max(0.0001,x)); // Temporal metrics with smoothing to avoid noisy false spikes
-const rawDkt = Di.map((d,i)=> (Fi[i]/safeT[i]) / Math.max(1e-9,Gi[i]));
-// Exponential moving average smoothing
-const alpha = 0.35;
-const Dkt = rawDkt.map((v,i)=> i ? alpha*v + (1-alpha)*rawDkt[i-1] : v);
-// Use average of adjacent time slices for a stable Δt
-const ak = Dkt.map((v,i)=> i ? (Dkt[i]-Dkt[i-1]) / ((safeT[i]+safeT[i-1])/2) : 0); const logsX=Gi.map(g=>Math.log(g+1e-9)), logsY=Fi.map(f=>Math.log(f+1e-9)); const {m,b:bb,r2}=linReg(logsX,logsY); const Dh=Di[I]||0; const cls=classify(Dh); const conf=confidence(Dh,m,tr,r2);
-  state={key,n,I,tr,model,b,Fi,Gi,Di,T,Dkt,ak,Dh,slope:m,r2,cls,conf}; updateSummary(); drawScatter($('chartFG'),logsX,logsY,{m, b:bb}); const xs=Array.from({length:I+1},(_,i)=>i); drawLines($('chartTime'),xs,Dkt,ak); const tb=$('rows'); tb.innerHTML=''; for(let i=0;i<=I;i++){const trEl=document.createElement('tr'); trEl.innerHTML=`<td>${i}</td><td>${Fi[i].toFixed(2)}</td><td>${Gi[i].toFixed(2)}</td><td>${(Di[i]||0).toFixed(6)}</td><td>${T[i].toFixed(3)}</td><td>${(Dkt[i]||0).toExponential(3)}</td><td>${(ak[i]||0).toExponential(3)}</td>`; tb.appendChild(trEl)} setParams({algo:key,n:n,depth:I,model:model,b:b,trials:tr}); }
+function analyze(key){
+  const n=parseInt($('n').value,10),I=parseInt($('depth').value,10),tr=Math.max(1,parseInt($('trials').value,10)),model=$('gmodel').value,b=parseFloat($('bval').value)||2;
+  let FiA=new Array(I+1).fill(0), TA=new Array(I+1).fill(0);
+  for(let t=0;t<tr;t++){const r=ALG[key].impl(n,I); for(let i=0;i<=I;i++){FiA[i]+=r.Fi[i]||0;TA[i]+=r.T[i]||0}}
+  const Fi=FiA.map(x=>x/tr), T=TA.map(x=>x/tr);
+  const Gi=buildGi(I,model,b,Fi);
+  const Di=Fi.map((v,i)=>v/Math.max(1e-9,Gi[i]));
+  const safeT=T.map(x=>Math.max(0.0001,x));
+  // Temporal metrics with smoothing to avoid noisy false spikes
+  const rawDkt = Di.map((d,i)=> (Fi[i]/safeT[i]) / Math.max(1e-9,Gi[i]));
+  const alpha = 0.35; // EMA factor
+  const Dkt = rawDkt.map((v,i)=> i ? alpha*v + (1-alpha)*rawDkt[i-1] : v);
+  const ak = Dkt.map((v,i)=> i ? (Dkt[i]-Dkt[i-1]) / ((safeT[i]+safeT[i-1])/2) : 0);
+  const logsX=Gi.map(g=>Math.log(g+1e-9)), logsY=Fi.map(f=>Math.log(f+1e-9));
+  const {m,b:bb,r2}=linReg(logsX,logsY);
+  const Dh=Di[I]||0; const cls=classify(Dh); const conf=confidence(Dh,m,tr,r2);
+  state={key,n,I,tr,model,b,Fi,Gi,Di,T,Dkt,ak,Dh,slope:m,r2,cls,conf};
+  updateSummary();
+  drawScatter($('chartFG'),logsX,logsY,{m, b:bb});
+  const xs=Array.from({length:I+1},(_,i)=>i);
+  drawLines($('chartTime'),xs,Dkt,ak);
+  const tb=$('rows'); tb.innerHTML='';
+  for(let i=0;i<=I;i++){
+    const trEl=document.createElement('tr');
+    trEl.innerHTML=`<td>${i}</td><td>${Fi[i].toFixed(2)}</td><td>${Gi[i].toFixed(2)}</td><td>${(Di[i]||0).toFixed(6)}</td><td>${T[i].toFixed(3)}</td><td>${(Dkt[i]||0).toExponential(3)}</td><td>${(ak[i]||0).toExponential(3)}</td>`;
+    tb.appendChild(trEl)
+  }
+  setParams({algo:key,n:n,depth:I,model:model,b:b,trials:tr});
+}
 
-function updateSummary(){ if(!state) return; $('mD').textContent=state.Dh.toFixed(4); $('mDt').textContent=isFinite(avg(state.Dkt))?avg(state.Dkt).toExponential(2):'—'; $('mA').textContent=isFinite(avg(state.ak))?avg(state.ak).toExponential(2):'—'; $('mSlope').textContent=state.slope.toFixed(3); $('mClass').textContent=state.cls; $('mConf').textContent=(state.conf*100).toFixed(0)+'%'; const warn=[]; if(state.Dh>0.85||state.slope>0.9) warn.push('⚠️ Near critical density; expect scaling cliffs.'); // Robust spike detection: compare max |a_k| against median & MAD to avoid constant warnings
-const absAk = state.ak.map(x=>Math.abs(x));
-const sorted = absAk.slice().sort((a,b)=>a-b);
-const med = sorted[Math.floor(sorted.length/2)] || 0;
-const mad = sorted.map(x=>Math.abs(x - med)).sort((a,b)=>a-b)[Math.floor(sorted.length/2)] || 0;
-const maxAbs = sorted[sorted.length-1] || 0;
-const spikeZ = (maxAbs - med) / (mad + 1e-9);
-if((spikeZ > 6 || maxAbs > 3*(mad+1e-9)) && maxAbs > 0.05) warn.push('⚠️ High acceleration spikes; instability likely.'); $('warnBox').style.display=warn.length?'block':'none'; $('warnBox').textContent=warn.join(' '); }
+function updateSummary(){ if(!state) return; $('mD').textContent=state.Dh.toFixed(4); $('mDt').textContent=isFinite(avg(state.Dkt))?avg(state.Dkt).toExponential(2):'—'; $('mA').textContent=isFinite(avg(state.ak))?avg(state.ak).toExponential(2):'—'; $('mSlope').textContent=state.slope.toFixed(3); $('mClass').textContent=state.cls; $('mConf').textContent=(state.conf*100).toFixed(0)+'%'; const warn=[]; if(state.Dh>0.85||state.slope>0.9) warn.push('⚠️ Near critical density; expect scaling cliffs.');
+  // Robust spike detection using median/MAD
+  const absAk = state.ak.map(x=>Math.abs(x));
+  const sorted = absAk.slice().sort((a,b)=>a-b);
+  const med = sorted[Math.floor(sorted.length/2)] || 0;
+  const mad = sorted.map(x=>Math.abs(x - med)).sort((a,b)=>a-b)[Math.floor(sorted.length/2)] || 0;
+  const maxAbs = sorted[sorted.length-1] || 0;
+  const spikeZ = (maxAbs - med) / (mad + 1e-9);
+  if((spikeZ > 6 || maxAbs > 3*(mad+1e-9)) && maxAbs > 0.05) warn.push('⚠️ High acceleration spikes; instability likely.');
+  $('warnBox').style.display=warn.length?'block':'none'; $('warnBox').textContent=warn.join(' ');
+}
 
 // ---------- Comparison & Temporal ----------
 function runCompare(){const a=$('cmpA').value,b=$('cmpB').value;const n=parseInt($('n').value,10),I=parseInt($('depth').value,10);const GA=ALG[a].impl(n,I), GB=ALG[b].impl(n,I);const Gi=buildGi(I,$('gmodel').value,parseFloat($('bval').value)||2,GA.Fi);const DiA=GA.Fi.map((v,i)=>v/Math.max(1e-9,Gi[i])), DiB=GB.Fi.map((v,i)=>v/Math.max(1e-9,Gi[i]));const xs=[...Array(I+1).keys()];drawLines($('chartCmp'),xs,DiA,DiB);$('cmpOut').style.display='block';$('cmpOut').textContent=`Final D: ${ALG[a].name}=${(DiA[I]||0).toFixed(4)} vs ${ALG[b].name}=${(DiB[I]||0).toFixed(4)}`}
@@ -244,14 +318,33 @@ function dlJSON(){ if(!state){alert('Run analysis first');return} const blob=new
 function dlCSV(){ if(!state){alert('Run analysis first');return} const rows=[['i','Fi','Gi','Di','dt_ms','Dkt','ak']]; for(let i=0;i<=state.I;i++){rows.push([i,state.Fi[i],state.Gi[i],state.Di[i],state.T[i],state.Dkt[i],state.ak[i]])} rows.push([]); rows.push(['META']); const meta=[['algo',ALG[state.key].name],['n',state.n],['depth',state.I],['model',state.model],['b',state.b],['trials',state.tr],['Dhat',state.Dh],['slope',state.slope],['r2',state.r2],['class',state.cls],['conf',state.conf]]; meta.forEach(([k,v])=>rows.push([k,v])); const blob=new Blob([toCSV(rows)],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`fractal_${state.key}.csv`; a.click()}
 function share(){ if(!state){alert('Run analysis first');return} const url=setParams({algo:state.key,n:state.n,depth:state.I,model:state.model,b:state.b,trials:state.tr}); navigator.clipboard?.writeText(url); alert('Configuration URL copied!') }
 
-// ---------- UI wiring ----------
-function setTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tabpane').forEach(p=>p.style.display='none');document.querySelector(`.tab[data-tab="${id}"]`).classList.add('active');$(id).style.display='block'}
-function populate(){const sel=$('algo'), A=$('cmpA'), B=$('cmpB'), lib=$('lib'); Object.entries(ALG).forEach(([k,v])=>{['algo','cmpA','cmpB'].forEach(id=>{const o=document.createElement('option');o.value=k;o.textContent=`${v.name} — ${v.cls}`;$(id).appendChild(o.cloneNode(true))}); const card=document.createElement('div'); card.className='shape'; card.innerHTML=`<div style="font-weight:800;color:var(--accent)">${v.name}</div><div class="muted">${v.cls} • ${v.cat}</div><button class="secondary" style="margin-top:8px" onclick="$('algo').value='${k}'; setTab('analyzer')">Analyze</button>`; lib.appendChild(card)})
+// ---------- Tabs ----------
+function setTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tabpane').forEach(p=>p.style.display='none');
+  const tabBtn=document.querySelector(`.tab[data-tab="${id}"]`);
+  if(tabBtn){tabBtn.classList.add('active');}
+  const pane=$(id); if(pane){pane.style.display='block';}
+}
+// Backwards-compat for any inline calls
+function showTab(id){ setTab(id); }
+
+function populate(){
+  const sel=$('algo'), A=$('cmpA'), B=$('cmpB'), lib=$('lib');
+  Object.entries(ALG).forEach(([k,v])=>{
+    ['algo','cmpA','cmpB'].forEach(id=>{const o=document.createElement('option');o.value=k;o.textContent=`${v.name} — ${v.cls}`;$(id).appendChild(o.cloneNode(true))});
+    const card=document.createElement('div');
+    card.className='shape';
+    card.innerHTML=`<div style="font-weight:800;color:var(--accent)">${v.name}</div><div class="muted">${v.cls} • ${v.cat}</div><button class="secondary" style="margin-top:8px" onclick="$('algo').value='${k}'; setTab('analyzer')">Analyze</button>`;
+    lib.appendChild(card)
+  })
   const q=getParams(); if(q.algo){$('algo').value=q.algo} if(q.n){$('n').value=q.n} if(q.depth){$('depth').value=q.depth} if(q.model){$('gmodel').value=q.model} if(q.b){$('bval').value=q.b} if(q.trials){$('trials').value=q.trials}
 }
 
 // Events
-['analyzer','library','compare','temporal','tests','learn','eng'].forEach(id=>{document.querySelector(`.tab[data-tab="${id}"]`).addEventListener('click',()=>setTab(id))})
+['analyzer','library','compare','temporal','tests','learn','explainer','eng'].forEach(id=>{
+  document.querySelector(`.tab[data-tab="${id}"]`).addEventListener('click',()=>setTab(id))
+});
 $('run').addEventListener('click',()=>analyze($('algo').value));
 $('downloadJson').addEventListener('click',dlJSON);
 $('downloadCsv').addEventListener('click',dlCSV);
@@ -270,7 +363,24 @@ $('gxA').addEventListener('click',runClassic);
 $('gxB').addEventListener('click',()=>{$('algo').value='fib';analyze('fib');setTimeout(()=>{$('algo').value='fibm';analyze('fibm')},400)});
 $('gxC').addEventListener('click',()=>{$('algo').value='bfs';analyze('bfs');setTimeout(()=>{$('algo').value='dfs';analyze('dfs')},400)});
 
-populate(); analyze('binary');
+// ---------- Self-tests (sanity) ----------
+(function selfTests(){
+  const results=[];
+  try{
+    setTab('explainer');
+    results.push(['tab_explainer_visible', $("explainer").style.display==='block']);
+    showTab('analyzer');
+    results.push(['showTab_wrapper_works', $("analyzer").style.display==='block']);
+  }catch(e){ results.push(['exceptions', false, e.message]); }
+  // Surface in console for developers
+  console.group('Fractal Big O — Self Tests');
+  results.forEach(([name,ok,msg])=>console[ok?'log':'error'](`${ok?'✅':'❌'} ${name}${msg?': '+msg:''}`));
+  console.groupEnd();
+})();
+
+populate();
+// Default run
+analyze('binary');
 </script>
 </body>
 </html>
