@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fractal Big O — Reproducible Classroom Demo (with Temporal Fractal)</title>
+  <style>
+    :root { --bg:#0b1020; --panel:#121933; --ink:#e8ecff; --muted:#a6b0d6; --accent:#7cc4ff; --ok:#7dffb2; --warn:#ffd36e; --bad:#ff8a8a; }
+    html,body{margin:0;height:100%;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    .wrap{max-width:1200px;margin:0 auto;padding:24px}
+    .grid{display:grid;gap:16px}
+    .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .card{background:linear-gradient(180deg,#111834,#0e1429);border:1px solid #1d2646;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+    .card>header{padding:16px 18px;border-bottom:1px solid #1d2646;color:#cfe1ff;font-weight:700}
+    .card>section{padding:16px 18px}
+    .controls label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .controls input,.controls select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #283056;background:#0c1330;color:var(--ink)}
+    .controls .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    button{background:linear-gradient(180deg,#2b6fff,#2984ff);border:none;color:white;padding:12px 14px;border-radius:12px;font-weight:800;cursor:pointer}
+    button.secondary{background:#1d2646}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid #30407a;color:#bcd1ff}
+    .small{font-size:12px;color:var(--muted)}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px 10px;border-bottom:1px solid #1d2646;font-variant-numeric:tabular-nums}
+    canvas{width:100%;height:260px;background:#0a1127;border-radius:12px}
+    code{background:#0e1635;padding:2px 6px;border-radius:6px}
+    .badge{padding:6px 10px;border-radius:8px;border:1px solid #2f3b73;color:#cfe1ff}
+    .footer{margin-top:18px;color:#9fb5ff;font-size:12px}
+    .stack{display:flex;flex-wrap:wrap;gap:10px}
+    .hl{color:#cfe1ff}
+    .tip{background:#0f1740;border:1px dashed #27408b;border-radius:12px;padding:10px 12px;color:#cfe1ff}
+    details{background:#0f1740;border:1px solid #27366a;border-radius:12px;padding:10px 12px}
+    summary{cursor:pointer;font-weight:700;color:#bcd1ff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 style="margin:0 0 6px 0">Fractal Big O — <span style="color:var(--accent)">One-Page Reproducible Demo</span></h1>
+    <p class="small" style="margin-top:0">Includes <strong>Temporal Fractal</strong> (speed & acceleration), guided tests, downloads, and a plain-language explainer for audiences (10th grade+). No external libraries.</p>
+
+    <div class="grid g2">
+      <!-- CONFIG -->
+      <div class="card">
+        <header>1) Configure & Run</header>
+        <section class="controls">
+          <div class="row">
+            <div>
+              <label>Algorithm</label>
+              <select id="algo" aria-label="Choose algorithm">
+                <option value="binary">Binary Search (1 path in a 2-way space)</option>
+                <option value="mergesort">Merge Sort (full binary split)</option>
+                <option value="fib">Naïve Fibonacci (branching ~2)</option>
+                <option value="fibmemo">Memoized Fibonacci (structure change)</option>
+              </select>
+            </div>
+            <div>
+              <label>Problem Size (n)</label>
+              <input id="n" type="number" value="256" min="2" aria-label="Problem size n"/>
+            </div>
+            <div>
+              <label>Max Depth (i_max)</label>
+              <input id="depth" type="number" value="8" min="1" aria-label="Max depth"/>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:12px">
+            <div>
+              <label>Branching Model for G<sub>i</sub></label>
+              <select id="gmodel" aria-label="Branching model">
+                <option value="fixed">Fixed b=2 (G<sub>i</sub>=2^i)</option>
+                <option value="emp">Empirical (learned from data)</option>
+                <option value="custom">Custom b (constant)</option>
+              </select>
+            </div>
+            <div>
+              <label>Custom b (if selected)</label>
+              <input id="bval" type="number" value="2" min="1" step="0.1" />
+            </div>
+            <div>
+              <label># Trials (average)</label>
+              <input id="trials" type="number" value="3" min="1" />
+            </div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button id="run">Run</button>
+            <button id="runTrials" class="secondary">Run Trials & Average</button>
+            <button id="downloadJson" class="secondary">Download JSON</button>
+            <button id="downloadCsv" class="secondary">Download CSV</button>
+            <button id="share" class="secondary">Copy Shareable Link</button>
+            <span class="pill">Reproduce anywhere: same inputs ⇒ same outputs</span>
+          </div>
+
+          <div class="tip" style="margin-top:12px">
+            <strong>Fractal Density:</strong> F<sub>i</sub> = calls made at depth i. G<sub>i</sub> = calls that could happen (by model). Density D<sub>i</sub>=F<sub>i</sub>/G<sub>i</sub>. If D → 1, the algorithm fills its space (critical). If D stays small, it's efficient.
+            <br><strong>Temporal Fractal:</strong> D<sub>k,t</sub> adds time (speed of filling), a<sub>k</sub> adds acceleration (change of speed).
+          </div>
+        </section>
+      </div>
+
+      <!-- RESULTS SUMMARY -->
+      <div class="card">
+        <header>2) Summary</header>
+        <section>
+          <div class="stack">
+            <div class="badge">\(\hat D_k\) (final): <span id="dk">—</span></div>
+            <div class="badge">Slope log(F) vs log(G): <span id="slope">—</span></div>
+            <div class="badge">\(\overline{D_{k,t}}\) (avg): <span id="dkt">—</span></div>
+            <div class="badge">\(\overline{a_k}\) (avg): <span id="ak">—</span></div>
+            <div class="badge">Class: <span id="klass">—</span></div>
+            <div class="badge">Confidence: <span id="conf">—</span></div>
+          </div>
+          <p class="small" style="margin-top:8px">Confidence grows when repeated trials agree and slope & density match expected classes (e.g., Naïve Fib > Memoized Fib in density and slope).</p>
+        </section>
+      </div>
+
+      <!-- PLOTS -->
+      <div class="card">
+        <header>3) Plot — log(F<sub>i</sub>) vs log(G<sub>i</sub>)</header>
+        <section>
+          <canvas id="chartFG" width="520" height="260" aria-label="log plot of F and G"></canvas>
+          <p class="small">Regression slope ≈ density trend. Points = (log G<sub>i</sub>, log F<sub>i</sub>).</p>
+        </section>
+      </div>
+
+      <div class="card">
+        <header>4) Plot — Temporal Density D<sub>k,t</sub> & Acceleration a<sub>k</sub></header>
+        <section>
+          <canvas id="chartTime" width="520" height="260" aria-label="temporal density chart"></canvas>
+          <p class="small">Per-depth rates using measured time Δt<sub>i</sub>. Shows speed and change of speed.</p>
+        </section>
+      </div>
+
+      <!-- RAW DATA -->
+      <div class="card">
+        <header>5) Raw Data</header>
+        <section>
+          <table>
+            <thead><tr><th>i</th><th>F<sub>i</sub> (real)</th><th>G<sub>i</sub> (model)</th><th>D<sub>i</sub>=F/G</th><th>Δt<sub>i</sub> (ms)</th><th>D<sub>k,t</sub></th><th>a<sub>k</sub></th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+      </div>
+
+      <!-- GUIDED TEST -->
+      <div class="card">
+        <header>6) Guided Reproducibility Test (Classroom Ready)</header>
+        <section>
+          <ol class="small" style="margin-top:0">
+            <li><strong>Naïve vs Memoized Fibonacci:</strong> Set n=28, i_max=10, model=fixed, trials=3. Run once with <span class="hl">Naïve Fibonacci</span>, then with <span class="hl">Memoized Fibonacci</span>. Expect higher \(\hat D_k\) and slope for Naïve.</li>
+            <li><strong>Binary Search:</strong> Set n=65536, i_max=16. Expect low \(\hat D_k\) and small slope (sparse use of space).</li>
+            <li><strong>Merge Sort:</strong> Set n=65536, i_max=16. Expect stable density (middle class), not near 1.</li>
+          </ol>
+          <div class="stack">
+            <button id="btnTest1" class="secondary">Run Test 1 (Fib vs Fib+Memo)</button>
+            <button id="btnTest2" class="secondary">Run Test 2 (Binary Search)</button>
+            <button id="btnTest3" class="secondary">Run Test 3 (Merge Sort)</button>
+          </div>
+          <p class="small" style="margin-top:10px">After each test, click <strong>Download JSON/CSV</strong>. Share the <strong>Copy Shareable Link</strong> so others can rerun with identical settings.</p>
+        </section>
+      </div>
+
+      <!-- METHOD NOTES -->
+      <div class="card">
+        <header>7) Method & Falsifiability</header>
+        <section>
+          <ul class="small" style="margin-top:0">
+            <li><strong>Transparent model:</strong> By default G<sub>i</sub>=2^i. Switch to <em>Empirical</em> to learn G<sub>i</sub> from the run, or set a <em>Custom</em> b.</li>
+            <li><strong>What would falsify?</strong> If repeated trials show slopes and densities <em>not</em> matching the expected classes (e.g., Naïve Fibonacci consistently below Memoized), that challenges the model.</li>
+            <li><strong>Download & compare:</strong> Everyone can download data and compare their curves. Agreement across machines increases confidence.</li>
+          </ul>
+        </section>
+      </div>
+
+      <!-- EXPLAINER -->
+      <div class="card">
+        <header>8) Learn More — How, Why, What & Benefits (10th-grade Friendly)</header>
+        <section>
+          <details open>
+            <summary>What does Fractal Big O do?</summary>
+            <p class="small">It expands classic Big O (speed) into <strong>structure + speed + acceleration</strong>. Each algorithm is a growing shape. We measure how much of its possible space it fills (D), how fast it fills (D<sub>t</sub>), and how that speed changes (a).</p>
+          </details>
+          <details>
+            <summary>How it works (in simple steps)</summary>
+            <ol class="small">
+              <li>Break work into levels (depths): 0,1,2,...</li>
+              <li>Count real work at each level → <strong>F<sub>i</sub></strong>.</li>
+              <li>Model possible work at each level → <strong>G<sub>i</sub></strong>.</li>
+              <li>Compute density <strong>D<sub>i</sub>=F<sub>i</sub>/G<sub>i</sub></strong>.</li>
+              <li>Add time: <strong>D<sub>k,t</sub>=(F<sub>i</sub>/Δt<sub>i</sub>)/G<sub>i</sub></strong> and <strong>a<sub>k</sub>=ΔD<sub>k,t</sub>/Δt</strong>.</li>
+            </ol>
+          </details>
+          <details>
+            <summary>Why CS benefits</summary>
+            <ul class="small">
+              <li><strong>Better diagnostics:</strong> See which levels waste work or saturate.</li>
+              <li><strong>Catch phase transitions:</strong> When D or slope → 1, expect explosive cost.</li>
+              <li><strong>Architectural insight:</strong> Memoization & structure changes reduce density classes.</li>
+              <li><strong>Unified modeling:</strong> Treat algorithms like physical flows (compatible with FTC).</li>
+            </ul>
+          </details>
+          <details>
+            <summary>Benefits beyond CS (modeling)</summary>
+            <ul class="small">
+              <li>Physics & Biology: branching, flow, and growth modeled like recursion.</li>
+              <li>Economics & Networks: cascading decisions as density propagation.</li>
+              <li>Education: experiment-driven computing—download, compare, falsify.</li>
+            </ul>
+          </details>
+        </section>
+      </div>
+
+    </div>
+
+    <div class="footer">Single-page static demo for classrooms & GitHub Pages • Includes Temporal Fractal • © 2025</div>
+  </div>
+
+<script>
+// -------- Utilities --------
+const byId = id => document.getElementById(id);
+function linReg(x, y){
+  const n = x.length; const sx = x.reduce((a,b)=>a+b,0); const sy = y.reduce((a,b)=>a+b,0);
+  const sxy = x.reduce((a,xi,i)=>a+xi*y[i],0); const sxx = x.reduce((a,xi)=>a+xi*xi,0);
+  const m = (n*sxy - sx*sy) / (n*sxx - sx*sx + 1e-9); const b = (sy - m*sx) / n; return {m,b};
+}
+function drawPointsWithLine(canvas, xs, ys, line){
+  const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
+  const pad = 26; const minX = Math.min(...xs), maxX = Math.max(...xs); const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const mapX = x => pad + (x-minX)/(maxX-minX+1e-9)*(canvas.width-2*pad);
+  const mapY = y => canvas.height-pad - (y-minY)/(maxY-minY+1e-9)*(canvas.height-2*pad);
+  ctx.strokeStyle = '#28407a'; ctx.lineWidth = 1; ctx.strokeRect(pad,pad,canvas.width-2*pad,canvas.height-2*pad);
+  ctx.fillStyle = '#7cc4ff'; for(let i=0;i<xs.length;i++){ const x = mapX(xs[i]), y = mapY(ys[i]); ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill(); }
+  if(line){ ctx.strokeStyle = '#7dffb2'; ctx.lineWidth = 2; const x1 = minX, x2 = maxX; const y1 = line.m*x1 + line.b; const y2 = line.m*x2 + line.b; ctx.beginPath(); ctx.moveTo(mapX(x1), mapY(y1)); ctx.lineTo(mapX(x2), mapY(y2)); ctx.stroke(); }
+}
+function drawTwoSeries(canvas, xs, s1, s2){
+  const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
+  const pad = 26; const minX = Math.min(...xs), maxX = Math.max(...xs); const minY = Math.min(Math.min(...s1), Math.min(...s2)); const maxY = Math.max(Math.max(...s1), Math.max(...s2));
+  const mapX = x => pad + (x-minX)/(maxX-minX+1e-9)*(canvas.width-2*pad);
+  const mapY = y => canvas.height-pad - (y-minY)/(maxY-minY+1e-9)*(canvas.height-2*pad);
+  ctx.strokeStyle = '#28407a'; ctx.lineWidth = 1; ctx.strokeRect(pad,pad,canvas.width-2*pad,canvas.height-2*pad);
+  ctx.strokeStyle = '#7cc4ff'; ctx.lineWidth = 2; ctx.beginPath(); for(let i=0;i<xs.length;i++){ const x = mapX(xs[i]), y = mapY(s1[i]); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); } ctx.stroke();
+  ctx.strokeStyle = '#ffd36e'; ctx.lineWidth = 2; ctx.beginPath(); for(let i=0;i<xs.length;i++){ const x = mapX(xs[i]), y = mapY(s2[i]); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); } ctx.stroke();
+}
+function avg(arr){ return arr.reduce((a,b)=>a+b,0)/arr.length; }
+function toCSV(rows){ return rows.map(r=>r.map(v=>String(v)).join(',')).join('\n'); }
+function setQueryParams(obj){ const url = new URL(location.href); Object.entries(obj).forEach(([k,v])=>url.searchParams.set(k,v)); history.replaceState(null,'',url.toString()); return url.toString(); }
+function getQueryParams(){ const p = new URL(location.href).searchParams; return Object.fromEntries(Array.from(p.entries())); }
+
+// -------- Algorithms (instrumented) --------
+function measureBinarySearch(n, iMax){
+  const Fi = []; const times = []; let size = n;
+  for(let i=0;i<=iMax;i++){
+    const t0 = performance.now();
+    Fi[i] = (size>1? 1: 0) + (i===0? 1: 0);
+    for(let k=0;k<Math.max(1, Math.floor(Math.log2(Math.max(2,size)))) ;k++){}
+    times[i] = performance.now()-t0; size = Math.max(1, Math.floor(size/2));
+  }
+  return {Fi, times};
+}
+function measureMergeSort(n, iMax){
+  const depthLimit = Math.min(iMax, Math.floor(Math.log2(Math.max(1,n)))); const Fi = []; const times = [];
+  for(let i=0;i<=iMax;i++){
+    const t0 = performance.now(); const d = Math.min(i, depthLimit);
+    Fi[i] = Math.pow(2, d);
+    const work = Math.max(1, Math.floor(n / Math.max(1,Math.pow(2,d))));
+    for(let k=0;k<work;k++){}
+    times[i] = performance.now()-t0;
+  }
+  return {Fi, times};
+}
+function measureFib(n, iMax){
+  const counts = new Array(iMax+1).fill(0); const tDepth = new Array(iMax+1).fill(0);
+  function fibCount(x, depth){ if(depth>iMax) return 0; counts[depth]++; if(x<=1) return 1; return fibCount(x-1, depth+1) + fibCount(x-2, depth+1); }
+  const nEff = Math.min(n, iMax+6); const t1 = performance.now(); fibCount(nEff,0); const t2 = performance.now();
+  const total = counts.reduce((a,b)=>a+b,0) || 1; for(let i=0;i<=iMax;i++){ tDepth[i] = (t2-t1) * (counts[i]/total); }
+  return {Fi:counts, times:tDepth};
+}
+function measureFibMemo(n, iMax){
+  const counts = new Array(iMax+1).fill(0); const tDepth = new Array(iMax+1).fill(0); const memo = new Map();
+  function fibMemo(x, depth){ if(depth>iMax) return 0; counts[depth]++; if(memo.has(x)) return memo.get(x); if(x<=1){ memo.set(x,1); return 1;} const v = fibMemo(x-1, depth+1) + fibMemo(x-2, depth+1); memo.set(x,v); return v; }
+  const nEff = Math.min(n, iMax+12); const t1 = performance.now(); fibMemo(nEff,0); const t2 = performance.now();
+  const total = counts.reduce((a,b)=>a+b,0) || 1; for(let i=0;i<=iMax;i++){ tDepth[i] = (t2-t1) * (counts[i]/total); }
+  return {Fi:counts, times:tDepth};
+}
+
+// -------- Core runner & modeling --------
+function buildGi(iMax, model, bconst, Fi){
+  if(model==='fixed'){ return Array.from({length:iMax+1},(_,i)=>Math.pow(2,i)); }
+  if(model==='custom'){ return Array.from({length:iMax+1},(_,i)=>Math.pow(bconst,i)); }
+  const bi = []; for(let i=1;i<=iMax;i++){ const prev = Math.max(1, Fi[i-1]); bi[i] = Fi[i]/prev; }
+  const bAvg = avg(bi.filter(x=>isFinite(x)&&x>0)) || 2; return Array.from({length:iMax+1},(_,i)=>Math.pow(bAvg,i));
+}
+function classify(d){ if(d < 0.3) return 'Triangle/Square (sparse)'; if(d < 0.6) return 'Circle (balanced)'; if(d < 0.8) return 'Pentagon (dense)'; if(d <= 1.05) return 'Hexagon (critical)'; return 'Aether (infeasible)'; }
+function confidence(dhat, slope, trials){ let c = 0.3; if(trials>=3) c+=0.2; if(dhat<0.3 && slope<0.5) c+=0.3; if(dhat>0.8 && slope>0.8) c+=0.3; return Math.min(0.99,c); }
+
+function runOnce(){
+  const algo = byId('algo').value; const n = parseInt(byId('n').value,10); const iMax = parseInt(byId('depth').value,10);
+  let res; if(algo==='binary') res = measureBinarySearch(n,iMax); if(algo==='mergesort') res = measureMergeSort(n,iMax); if(algo==='fib') res = measureFib(n,iMax); if(algo==='fibmemo') res = measureFibMemo(n,iMax);
+  return res;
+}
+
+function run(){
+  const trials = Math.max(1, parseInt(byId('trials').value,10)); const gmodel = byId('gmodel').value; const bconst = parseFloat(byId('bval').value||2);
+  const iMax = parseInt(byId('depth').value,10);
+  let FiA = new Array(iMax+1).fill(0); let tA = new Array(iMax+1).fill(0);
+  for(let t=0;t<trials;t++){ const r = runOnce(); for(let i=0;i<=iMax;i++){ FiA[i]+= (r.Fi[i]||0); tA[i]+= (r.times[i]||0); } }
+  const Fi = FiA.map(x=>x/trials); const times = tA.map(x=>x/trials);
+  const Gi = buildGi(iMax, gmodel, bconst, Fi);
+  const Di = Fi.map((v,i)=> v / (Gi[i]||1));
+  const timesSafe = times.map(t=>Math.max(0.0001,t));
+  const Dkt = Di.map((d,i)=> (Fi[i]/timesSafe[i]) / (Gi[i]||1));
+  const ak = Dkt.map((v,i)=> i? (Dkt[i]-Dkt[i-1]) / (timesSafe[i]) : 0);
+
+  const Dhat = Di[iMax] || 0; const logsX = Gi.map(g=>Math.log(g+1e-9)); const logsY = Fi.map(f=>Math.log(f+1e-9)); const {m:slope} = linReg(logsX, logsY);
+  const avgDkt = avg(Dkt); const avgAk = avg(ak); const klass = classify(Dhat); const conf = confidence(Dhat, slope, trials);
+
+  byId('dk').textContent = Dhat.toFixed(4); byId('slope').textContent = slope.toFixed(4); byId('dkt').textContent = isFinite(avgDkt)? avgDkt.toExponential(3) : '—'; byId('ak').textContent = isFinite(avgAk)? avgAk.toExponential(3) : '—'; byId('klass').textContent = klass; byId('conf').textContent = (conf*100).toFixed(0)+'%';
+
+  const tbody = byId('rows'); tbody.innerHTML = '';
+  for(let i=0;i<=iMax;i++){
+    const tr = document.createElement('tr'); tr.innerHTML = `<td>${i}</td><td>${Fi[i].toFixed(2)}</td><td>${Gi[i].toFixed(2)}</td><td>${(Di[i]||0).toFixed(6)}</td><td>${times[i].toFixed(3)}</td><td>${(Dkt[i]||0).toExponential(3)}</td><td>${(ak[i]||0).toExponential(3)}</td>`; tbody.appendChild(tr);
+  }
+
+  drawPointsWithLine(byId('chartFG'), logsX, logsY, {m:slope,b:0}); const xs = Array.from({length:iMax+1},(_,i)=>i); drawTwoSeries(byId('chartTime'), xs, Dkt.map(x=>isFinite(x)?x:0), ak.map(x=>isFinite(x)?x:0));
+
+  const state = {algo:byId('algo').value, n:parseInt(byId('n').value,10), iMax, gmodel, bconst, trials, Fi, Gi, Di, times, Dkt, ak, Dhat, slope, avgDkt, avgAk, klass, conf};
+  window.__demoData = state; setQueryParams({algo:state.algo,n:state.n,iMax:state.iMax,g:state.gmodel,b:state.bconst,trials:state.trials});
+}
+
+byId('run').addEventListener('click', run);
+byId('runTrials').addEventListener('click', run);
+byId('downloadJson').addEventListener('click',()=>{ const blob = new Blob([JSON.stringify(window.__demoData||{}, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fractal_big_o_results.json'; a.click(); });
+byId('downloadCsv').addEventListener('click',()=>{
+  const d = window.__demoData||{}; const header = ['i','Fi','Gi','Di','dt_ms','Dkt','ak']; const rows = [header]; const iMax = d.iMax||0; for(let i=0;i<=iMax;i++){ rows.push([i, (d.Fi?.[i]??''), (d.Gi?.[i]??''), (d.Di?.[i]??''), (d.times?.[i]??''), (d.Dkt?.[i]??''), (d.ak?.[i]??'')]); }
+  const meta = ['algo','n','iMax','gmodel','bconst','trials','Dhat','slope','avgDkt','avgAk','klass','conf']; rows.push([]); rows.push(['META']); rows.push(meta); rows.push(meta.map(k=>d[k])); const blob = new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fractal_big_o_results.csv'; a.click();
+});
+byId('share').addEventListener('click',()=>{ const url = setQueryParams({algo:byId('algo').value,n:byId('n').value,iMax:byId('depth').value,g:byId('gmodel').value,b:byId('bval').value,trials:byId('trials').value}); navigator.clipboard.writeText(url); alert('Link copied! Share this URL to reproduce the exact run.'); });
+
+byId('btnTest1').addEventListener('click',()=>{ byId('algo').value='fib'; byId('n').value=28; byId('depth').value=10; byId('gmodel').value='fixed'; byId('trials').value=3; run(); setTimeout(()=>{ byId('algo').value='fibmemo'; run(); }, 400); });
+byId('btnTest2').addEventListener('click',()=>{ byId('algo').value='binary'; byId('n').value=65536; byId('depth').value=16; byId('gmodel').value='fixed'; byId('trials').value=3; run(); });
+byId('btnTest3').addEventListener('click',()=>{ byId('algo').value='mergesort'; byId('n').value=65536; byId('depth').value=16; byId('gmodel').value='fixed'; byId('trials').value=3; run(); });
+
+(function initFromURL(){ const q = getQueryParams(); if(q.algo) byId('algo').value=q.algo; if(q.n) byId('n').value=q.n; if(q.iMax) byId('depth').value=q.iMax; if(q.g) byId('gmodel').value=q.g; if(q.b) byId('bval').value=q.b; if(q.trials) byId('trials').value=q.trials; })();
+run();
+</script>
+</body>
+</html>
